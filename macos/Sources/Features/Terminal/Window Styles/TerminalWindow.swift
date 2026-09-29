@@ -66,8 +66,13 @@ class TerminalWindow: NSWindow {
             guard tabColor != oldValue else { return }
             tabColorIndicator.rootView = TabColorIndicatorView(tabColor: tabColor)
             invalidateRestorableState()
+            tabStateDidChange()
         }
     }
+
+    /// Called when state that is displayed in a tab (title, color, shortcut, zoom)
+    /// changes. Subclasses that render their own tabs can override this.
+    func tabStateDidChange() {}
 
     // MARK: NSWindow Overrides
 
@@ -326,6 +331,8 @@ class TerminalWindow: NSWindow {
 
     var keyEquivalent: String? {
         didSet {
+            if keyEquivalent != oldValue { tabStateDidChange() }
+
             // When our key equivalent is set, we must update the tab label.
             guard let keyEquivalent else {
                 keyEquivalentLabel.attributedStringValue = NSAttributedString()
@@ -357,6 +364,7 @@ class TerminalWindow: NSWindow {
             // Show/hide our reset zoom button depending on if we're zoomed.
             // We want to show it if we are zoomed.
             resetZoomTabButton.isHidden = !surfaceIsZoomed
+            if surfaceIsZoomed != oldValue { tabStateDidChange() }
 
             DispatchQueue.main.async {
                 self.viewModel.isSurfaceZoomed = self.surfaceIsZoomed
@@ -394,6 +402,7 @@ class TerminalWindow: NSWindow {
             guard title != oldValue else { return }
 
             syncWindowTitleAppearance()
+            tabStateDidChange()
         }
     }
 

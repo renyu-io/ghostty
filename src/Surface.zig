@@ -5568,6 +5568,12 @@ pub fn performBindingAction(self: *Surface, action: input.Binding.Action) !bool 
             {},
         ),
 
+        .toggle_zen_tabs => return try self.rt_app.performAction(
+            .{ .surface = self },
+            .toggle_zen_tabs,
+            {},
+        ),
+
         .show_on_screen_keyboard => return try self.rt_app.performAction(
             .{ .surface = self },
             .show_on_screen_keyboard,

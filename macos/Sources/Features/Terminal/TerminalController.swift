@@ -21,6 +21,7 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         let nib = switch config.macosTitlebarStyle {
         case .native: "Terminal"
         case .hidden: "TerminalHiddenTitlebar"
+        case .zen: "TerminalZen"
         case .transparent: "TerminalTransparentTitlebar"
         case .tabs:
 #if compiler(>=6.2)
@@ -50,6 +51,9 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
     /// AppKit can settle tab/window state first. Close actions must cancel it to avoid
     /// re-showing a tab/window that was already closed.
     private var pendingInitialPresentation: DispatchWorkItem?
+
+    /// The tabs shown in the sidebar when using the zen titlebar style.
+    private var zenTabs: ZenTabsModel?
 
     /// This is set to false by init if the window managed by this controller should not be restorable.
     /// For example, terminals executing custom scripts are not restorable.
@@ -564,6 +568,9 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
             // Update our derived config
             self.derivedConfig = DerivedConfig(config)
 
+            // The zen sidebar layout is shared by all windows.
+            ZenSidebarSettings.shared.update(from: config)
+
             // If we have no surfaces in our window (is that possible?) then we update
             // our window appearance based on the root config. If we have surfaces, we
             // don't call this because focused surface changes will trigger appearance updates.
@@ -602,6 +609,11 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
                     window.keyEquivalent = ""
                 }
             }
+        }
+
+        // Tabs may have been added, removed, or reordered.
+        if window is ZenTerminalWindow {
+            NotificationCenter.default.post(name: .ghosttyZenTabsDidChange, object: window)
         }
     }
 
@@ -1107,9 +1119,23 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
             focusedSurface = view
         }
 
-        // Initialize our content view to the SwiftUI root
-        let container = TerminalViewContainer {
-            TerminalView(ghostty: ghostty, viewModel: self, delegate: self)
+        // Initialize our content view to the SwiftUI root. The zen titlebar
+        // style wraps the terminal with a vertical tab sidebar.
+        let container: TerminalViewContainer
+        if window is ZenTerminalWindow {
+            let zenTabs = ZenTabsModel()
+            zenTabs.window = window
+            self.zenTabs = zenTabs
+            (window as? ZenTerminalWindow)?.zenTabs = zenTabs
+            container = TerminalViewContainer {
+                ZenTerminalView(tabs: zenTabs) {
+                    TerminalView(ghostty: ghostty, viewModel: self, delegate: self)
+                }
+            }
+        } else {
+            container = TerminalViewContainer {
+                TerminalView(ghostty: ghostty, viewModel: self, delegate: self)
+            }
         }
 
         // Set the initial content size on the container so that

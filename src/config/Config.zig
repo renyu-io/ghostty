@@ -3362,7 +3362,7 @@ keybind: Keybinds = .{},
 @"macos-window-buttons": MacWindowButtons = .visible,
 
 /// The style of the macOS titlebar. Available values are: "native",
-/// "transparent", "tabs", and "hidden".
+/// "transparent", "tabs", "hidden", and "zen".
 ///
 /// The "native" style uses the native macOS titlebar with zero customization.
 /// The titlebar will match your window theme (see `window-theme`).
@@ -3396,12 +3396,56 @@ keybind: Keybinds = .{},
 /// areas of the frame to drag the window. This is a standard macOS behavior
 /// and not something Ghostty enables.
 ///
+/// The "zen" style is a distraction-free layout inspired by the Zen
+/// browser. The titlebar is hidden and only slides into view while the
+/// mouse is at the top edge of the window. Tabs are shown in a vertical
+/// sidebar instead of the native horizontal tab bar. The sidebar can be
+/// placed on the left or right side of the window with
+/// `macos-zen-tab-position`, and can be resized by dragging its edge.
+///
 /// The default value is "transparent". This is an opinionated choice
 /// but its one I think is the most aesthetically pleasing and works in
 /// most cases.
 ///
 /// Changing this option at runtime only applies to new windows.
 @"macos-titlebar-style": MacTitlebarStyle = .transparent,
+
+/// The side of the window the vertical tab sidebar is shown on when
+/// `macos-titlebar-style = zen`. This has no effect with any other
+/// titlebar style.
+///
+/// Valid values are:
+///
+///   * `left` - Show the tab sidebar on the left side of the window.
+///   * `right` - Show the tab sidebar on the right side of the window.
+///
+/// The sidebar side can also be switched temporarily from the sidebar's
+/// context menu. Reloading the configuration restores this value.
+///
+/// This setting can be changed at runtime and will affect all
+/// currently open windows.
+@"macos-zen-tab-position": MacZenTabPosition = .left,
+
+/// When the vertical tab sidebar is visible when
+/// `macos-titlebar-style = zen`. This has no effect with any other
+/// titlebar style.
+///
+/// Valid values are:
+///
+///   * `hover` - Hide the tab sidebar until the mouse is moved to the
+///     edge of the window it is on (see `macos-zen-tab-position`). The
+///     sidebar then slides in over the terminal and hides again when the
+///     mouse leaves it. The terminal is not resized when the sidebar is
+///     shown or hidden. This is the default.
+///   * `always` - Always show the tab sidebar next to the terminal.
+///
+/// This can be toggled at runtime with the `toggle_zen_tabs` keybind
+/// action or from the sidebar's context menu. Reloading the configuration
+/// restores this value.
+///
+/// This setting can be changed at runtime and will affect all
+/// currently open windows.
+@"macos-zen-tab-visibility": MacZenTabVisibility = .hover,
 
 /// Whether the proxy icon in the macOS titlebar is visible. The proxy icon
 /// is the icon that represents the folder of the current working directory.
@@ -9205,6 +9249,19 @@ pub const MacTitlebarStyle = enum {
     transparent,
     tabs,
     hidden,
+    zen,
+};
+
+/// See macos-zen-tab-position
+pub const MacZenTabPosition = enum {
+    left,
+    right,
+};
+
+/// See macos-zen-tab-visibility
+pub const MacZenTabVisibility = enum {
+    always,
+    hover,
 };
 
 /// See macos-titlebar-proxy-icon

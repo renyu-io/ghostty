@@ -714,6 +714,11 @@ extension Ghostty {
             case GHOSTTY_ACTION_TOGGLE_BACKGROUND_OPACITY:
                 toggleBackgroundOpacity(app, target: target)
 
+            case GHOSTTY_ACTION_TOGGLE_ZEN_TABS:
+                // The zen sidebar visibility is shared by all windows so the
+                // target doesn't matter.
+                ZenSidebarSettings.shared.toggleVisibility()
+
             case GHOSTTY_ACTION_KEY_SEQUENCE:
                 keySequence(app, target: target, v: action.action.key_sequence)
 

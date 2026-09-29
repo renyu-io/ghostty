@@ -100,10 +100,39 @@ struct ConfigTests {
         ("transparent", Ghostty.Config.MacOSTitlebarStyle.transparent),
         ("tabs", Ghostty.Config.MacOSTitlebarStyle.tabs),
         ("hidden", Ghostty.Config.MacOSTitlebarStyle.hidden),
+        ("zen", Ghostty.Config.MacOSTitlebarStyle.zen),
     ])
     func macosTitlebarStyleValues(raw: String, expected: Ghostty.Config.MacOSTitlebarStyle) throws {
         let config = try TemporaryConfig("macos-titlebar-style = \(raw)")
         #expect(config.macosTitlebarStyle == expected)
+    }
+
+    @Test func macosZenTabPositionDefaultsToLeft() throws {
+        let config = try TemporaryConfig("")
+        #expect(config.macosZenTabPosition == .left)
+    }
+
+    @Test(arguments: [
+        ("left", Ghostty.Config.MacOSZenTabPosition.left),
+        ("right", Ghostty.Config.MacOSZenTabPosition.right),
+    ])
+    func macosZenTabPositionValues(raw: String, expected: Ghostty.Config.MacOSZenTabPosition) throws {
+        let config = try TemporaryConfig("macos-zen-tab-position = \(raw)")
+        #expect(config.macosZenTabPosition == expected)
+    }
+
+    @Test func macosZenTabVisibilityDefaultsToHover() throws {
+        let config = try TemporaryConfig("")
+        #expect(config.macosZenTabVisibility == .hover)
+    }
+
+    @Test(arguments: [
+        ("always", Ghostty.Config.MacOSZenTabVisibility.always),
+        ("hover", Ghostty.Config.MacOSZenTabVisibility.hover),
+    ])
+    func macosZenTabVisibilityValues(raw: String, expected: Ghostty.Config.MacOSZenTabVisibility) throws {
+        let config = try TemporaryConfig("macos-zen-tab-visibility = \(raw)")
+        #expect(config.macosZenTabVisibility == expected)
     }
 
     @Test func resizeOverlayDefaultsToAfterFirst() throws {

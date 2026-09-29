@@ -883,6 +883,14 @@ pub const Action = union(enum) {
     /// Only implemented on macOS.
     toggle_background_opacity,
 
+    /// Toggle the vertical tab sidebar between always visible and only
+    /// visible when the mouse is at the edge of the window. This only has
+    /// an effect with `macos-titlebar-style = zen`. See
+    /// `macos-zen-tab-visibility`.
+    ///
+    /// Only implemented on macOS.
+    toggle_zen_tabs,
+
     /// Check for updates.
     ///
     /// Only implemented on macOS.
@@ -1429,6 +1437,7 @@ pub const Action = union(enum) {
             .toggle_mouse_reporting,
             .toggle_command_palette,
             .toggle_background_opacity,
+            .toggle_zen_tabs,
             .show_on_screen_keyboard,
             .reset_window_size,
             .activate_key_table,

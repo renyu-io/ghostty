@@ -679,6 +679,12 @@ fn actionCommands(action: Action.Key) []const Command {
             .description = i18n.N_("Toggle the background opacity of a window that started transparent."),
         }},
 
+        .toggle_zen_tabs => comptime &.{.{
+            .action = .toggle_zen_tabs,
+            .title = i18n.N_("Toggle Zen Tab Sidebar"),
+            .description = i18n.N_("Toggle the zen tab sidebar between always visible and shown on hover."),
+        }},
+
         .check_for_updates => comptime &.{.{
             .action = .check_for_updates,
             .title = i18n.N_("Check for Updates"),
