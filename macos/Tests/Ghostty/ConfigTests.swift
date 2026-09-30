@@ -121,6 +121,18 @@ struct ConfigTests {
         #expect(config.macosZenTabPosition == expected)
     }
 
+    @Test func windowPaddingDefaults() throws {
+        let config = try TemporaryConfig("")
+        #expect(config.windowPaddingX == .init(topLeft: 2, bottomRight: 2))
+        #expect(config.windowPaddingY == .init(topLeft: 2, bottomRight: 2))
+    }
+
+    @Test func windowPaddingValues() throws {
+        let config = try TemporaryConfig("window-padding-x = 5\nwindow-padding-y = 3,12")
+        #expect(config.windowPaddingX == .init(topLeft: 5, bottomRight: 5))
+        #expect(config.windowPaddingY == .init(topLeft: 3, bottomRight: 12))
+    }
+
     @Test func macosZenTabVisibilityDefaultsToHover() throws {
         let config = try TemporaryConfig("")
         #expect(config.macosZenTabVisibility == .hover)

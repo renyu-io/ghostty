@@ -2,6 +2,19 @@ import AppKit
 import Combine
 import SwiftUI
 
+private struct ContentInsetsKey: EnvironmentKey {
+    static let defaultValue = EdgeInsets()
+}
+
+extension EnvironmentValues {
+    /// Space that ``TerminalView`` leaves around the terminal when its content
+    /// extends into the titlebar area (see ``ZenTerminalWindow``).
+    var ghosttyContentInsets: EdgeInsets {
+        get { self[ContentInsetsKey.self] }
+        set { self[ContentInsetsKey.self] = newValue }
+    }
+}
+
 extension Notification.Name {
     /// Posted when something about a terminal tab changes that should be reflected
     /// in the zen tab sidebar (title, color, order, selection, etc.).
@@ -83,6 +96,11 @@ final class ZenTabsModel: ObservableObject {
     }
 
     @Published private(set) var tabs: [Tab] = []
+
+    /// The space above and below the terminal so the window's rounded corners
+    /// don't clip it.
+    /// This is managed by ``ZenTerminalWindow``.
+    @Published var contentInsets = EdgeInsets()
 
     /// True while the sidebar is revealed with `macos-zen-tab-visibility = hover`.
     @Published private(set) var isRevealed: Bool = false
@@ -329,6 +347,7 @@ struct ZenTerminalView<Content: View>: View {
                 }
 
                 content
+                    .environment(\.ghosttyContentInsets, tabs.contentInsets)
 
                 if settings.visibility == .always && settings.position == .right {
                     ZenTabSidebar(model: tabs, settings: settings)

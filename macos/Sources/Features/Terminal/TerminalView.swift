@@ -50,6 +50,9 @@ struct TerminalView<ViewModel: TerminalViewModel>: View {
     /// The most recently focused surface, equal to `focusedSurface` when it is non-nil.
     @State private var lastFocusedSurface: Weak<Ghostty.SurfaceView>?
 
+    // Space to leave around the terminal, see ``EnvironmentValues/ghosttyContentInsets``.
+    @Environment(\.ghosttyContentInsets) private var contentInsets
+
     // This seems like a crutch after switching from SwiftUI to AppKit lifecycle.
     @FocusState private var focused: Bool
 
@@ -104,6 +107,9 @@ struct TerminalView<ViewModel: TerminalViewModel>: View {
                         .frame(idealWidth: lastFocusedSurface?.value?.initialSize?.width,
                                idealHeight: lastFocusedSurface?.value?.initialSize?.height)
                 }
+                // The inset must be applied inside the safe area modifier below, otherwise
+                // ignoring the safe area would extend the terminal back over it.
+                .padding(contentInsets)
                 // Ignore safe area to extend up in to the titlebar region if we have the "hidden" or "zen" titlebar style
                 .ignoresSafeArea(.container, edges: ghostty.config.macosTitlebarStyle.extendsContentIntoTitlebar ? .top : [])
 

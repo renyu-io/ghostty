@@ -544,6 +544,12 @@ typedef struct {
   uint8_t b;
 } ghostty_config_color_s;
 
+// config.WindowPadding
+typedef struct {
+  uint32_t top_left;
+  uint32_t bottom_right;
+} ghostty_config_window_padding_s;
+
 // config.ColorList
 typedef struct {
   const ghostty_config_color_s* colors;

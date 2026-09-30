@@ -161,6 +161,20 @@ test "c_get: color" {
     try testing.expectEqual(0, cval.b);
 }
 
+test "c_get: window-padding" {
+    const testing = std.testing;
+    const alloc = testing.allocator;
+
+    var c = try Config.default(alloc);
+    defer c.deinit();
+    c.@"window-padding-y" = .{ .top_left = 4, .bottom_right = 9 };
+
+    var cval: Config.WindowPadding.C = undefined;
+    try testing.expect(get(&c, .@"window-padding-y", @ptrCast(&cval)));
+    try testing.expectEqual(4, cval.top_left);
+    try testing.expectEqual(9, cval.bottom_right);
+}
+
 test "c_get: optional" {
     const testing = std.testing;
     const alloc = testing.allocator;

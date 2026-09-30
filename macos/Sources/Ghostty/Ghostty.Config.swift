@@ -381,6 +381,20 @@ extension Ghostty {
             return MacOSZenTabVisibility(rawValue: String(cString: ptr)) ?? defaultValue
         }
 
+        /// The `window-padding-x` value as (left, right).
+        var windowPaddingX: WindowPadding { windowPadding(key: "window-padding-x") }
+
+        /// The `window-padding-y` value as (top, bottom).
+        var windowPaddingY: WindowPadding { windowPadding(key: "window-padding-y") }
+
+        private func windowPadding(key: String) -> WindowPadding {
+            let defaultValue = WindowPadding(topLeft: 2, bottomRight: 2)
+            guard let config = self.config else { return defaultValue }
+            var v = ghostty_config_window_padding_s()
+            guard ghostty_config_get(config, &v, key, UInt(key.lengthOfBytes(using: .utf8))) else { return defaultValue }
+            return WindowPadding(topLeft: CGFloat(v.top_left), bottomRight: CGFloat(v.bottom_right))
+        }
+
         var macosTitlebarProxyIcon: MacOSTitlebarProxyIcon {
             let defaultValue = MacOSTitlebarProxyIcon.visible
             guard let config = self.config else { return defaultValue }
@@ -951,6 +965,15 @@ extension Ghostty.Config {
 
     enum MacOSZenTabVisibility: String {
         case always, hover
+    }
+
+    /// A `window-padding-x` or `window-padding-y` value, in points.
+    struct WindowPadding: Equatable {
+        /// The top or left padding.
+        let topLeft: CGFloat
+
+        /// The bottom or right padding.
+        let bottomRight: CGFloat
     }
 
     enum DragHandle: String {

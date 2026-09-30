@@ -571,6 +571,9 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
             // The zen sidebar layout is shared by all windows.
             ZenSidebarSettings.shared.update(from: config)
 
+            // The zen content insets depend on the window padding.
+            (window as? ZenTerminalWindow)?.updateContentInsets(config: config)
+
             // If we have no surfaces in our window (is that possible?) then we update
             // our window appearance based on the root config. If we have surfaces, we
             // don't call this because focused surface changes will trigger appearance updates.

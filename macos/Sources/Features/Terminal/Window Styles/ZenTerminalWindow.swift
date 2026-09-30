@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 
 /// The window for `macos-titlebar-style = zen`.
 ///
@@ -29,7 +30,9 @@ class ZenTerminalWindow: TerminalWindow {
 
     /// The vertical tab sidebar model, notified of mouse movement so it can
     /// reveal itself on hover.
-    weak var zenTabs: ZenTabsModel?
+    weak var zenTabs: ZenTabsModel? {
+        didSet { updateContentInsets() }
+    }
 
     /// True while the titlebar is revealed.
     private(set) var isTitlebarRevealed: Bool = false
@@ -117,6 +120,64 @@ class ZenTerminalWindow: TerminalWindow {
         super.becomeMain()
         hideNativeTabBar()
         applyTitlebarVisibility(animated: false)
+        updateContentInsets()
+    }
+
+    // MARK: Content Insets
+
+    /// The radius of the window's rounded corners.
+    private var cornerRadius: CGFloat {
+        if responds(to: Selector(("_cornerRadius"))),
+           let radius = value(forKey: "_cornerRadius") as? CGFloat,
+           radius > 0 {
+            return radius
+        }
+
+        return derivedConfig.windowCornerRadius
+    }
+
+    /// Because the terminal extends to the top of the window, the rounded top
+    /// corners of the window would clip the first row of the terminal. Other
+    /// titlebar styles don't have this problem because the titlebar is above
+    /// the terminal. We inset the terminal just enough to clear the corner curve.
+    ///
+    /// The same is done at the bottom. Without it, whether the last row is
+    /// clipped by the bottom corners depends on how evenly the rows divide the
+    /// window height.
+    ///
+    /// To keep as much room as possible for the terminal, the inset is only what
+    /// the configured `window-padding-y` doesn't already cover. Fullscreen windows
+    /// have square corners so need no inset.
+    func updateContentInsets(config: Ghostty.Config? = nil, fullscreen: Bool? = nil) {
+        var insets = EdgeInsets()
+        if !(fullscreen ?? isFullscreen),
+           let config = config ?? (NSApp.delegate as? AppDelegate)?.ghostty.config {
+            let paddingX = config.windowPaddingX
+            let paddingY = config.windowPaddingY
+            let clearance = Self.cornerClearance(
+                radius: cornerRadius,
+                horizontalPadding: min(paddingX.topLeft, paddingX.bottomRight))
+            insets.top = max(0, clearance - paddingY.topLeft)
+            insets.bottom = max(0, clearance - paddingY.bottomRight)
+        }
+
+        if zenTabs?.contentInsets != insets {
+            zenTabs?.contentInsets = insets
+        }
+    }
+
+    /// The distance from the top (or bottom) edge of the window at which a point
+    /// `horizontalPadding` in from the side edge is no longer clipped by a
+    /// rounded corner of the given radius. Terminal content starts at the
+    /// horizontal padding, so this is the minimum vertical space it needs.
+    static func cornerClearance(radius: CGFloat, horizontalPadding: CGFloat) -> CGFloat {
+        guard radius > 0, horizontalPadding < radius else { return 0 }
+        let dx = radius - horizontalPadding
+        let clearance = radius - (radius * radius - dx * dx).squareRoot()
+
+        // macOS draws continuous ("squircle") corners which differ slightly
+        // from a circular arc, so we add a point of margin.
+        return ceil(clearance + 1)
     }
 
     override func resignKey() {
@@ -286,6 +347,8 @@ class ZenTerminalWindow: TerminalWindow {
             view.isHidden = false
             view.alphaValue = 1
         }
+
+        updateContentInsets(fullscreen: true)
     }
 
     @objc private func fullscreenDidChange(_ notification: Notification) {
@@ -296,6 +359,7 @@ class ZenTerminalWindow: TerminalWindow {
         // visibility since AppKit tends to reset these.
         hideNativeTabBar()
         applyTitlebarVisibility(animated: false)
+        updateContentInsets()
     }
 }
 
